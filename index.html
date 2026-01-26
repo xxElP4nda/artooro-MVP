@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instagram Quiz</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState } = React;
+    const { ChevronDown, Check, X, MapPin, Sparkles } = lucide;
+
+    const pages = [
+      {
+        type: 'content',
+        image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&h=1200&fit=crop',
+        title: 'Paris',
+        text: 'The City of Light awaits you with its timeless elegance and charm.',
+        location: { lat: 48.8566, lng: 2.3522, name: 'Paris, France' }
+      },
+      {
+        type: 'question',
+        image: 'https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=800&h=1200&fit=crop',
+        question: 'What is the most visited monument in Paris?',
+        options: ['Notre-Dame', 'Eiffel Tower', 'Louvre Museum', 'Arc de Triomphe'],
+        correct: 1
+      },
+      {
+        type: 'content',
+        image: 'https://images.unsplash.com/photo-1549144511-f099e773c147?w=800&h=1200&fit=crop',
+        title: 'Montmartre',
+        text: 'A historic hill crowned by the stunning Sacré-Cœur Basilica.',
+        location: { lat: 48.8867, lng: 2.3431, name: 'Montmartre, Paris' }
+      },
+      {
+        type: 'question',
+        image: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800&h=1200&fit=crop',
+        question: 'The Louvre was originally built as what?',
+        options: ['A museum', 'A palace', 'A fortress', 'A church'],
+        correct: 2
+      },
+      {
+        type: 'content',
+        image: 'https://images.unsplash.com/photo-1500313830747-097e93a1f6e8?w=800&h=1200&fit=crop',
+        title: 'Seine River',
+        text: 'The romantic heart of Paris flows through centuries of history.',
+        location: { lat: 48.8606, lng: 2.3376, name: 'Seine River, Paris' }
+      },
+      {
+        type: 'question',
+        image: 'https://images.unsplash.com/photo-1481887328591-6b1f00d4f7f7?w=800&h=1200&fit=crop',
+        question: 'How many arrondissements does Paris have?',
+        options: ['12', '16', '20', '24'],
+        correct: 2
+      },
+      {
+        type: 'content',
+        image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&h=1200&fit=crop',
+        title: 'À Bientôt!',
+        text: 'Your Parisian journey ends here. Until we meet again in the City of Light.',
+        location: { lat: 48.8566, lng: 2.3522, name: 'Paris, France' }
+      }
+    ];
+
+    function InstagramQuiz() {
+      const [currentPage, setCurrentPage] = useState(0);
+      const [selectedAnswer, setSelectedAnswer] = useState(null);
+      const [showResult, setShowResult] = useState(false);
+      const [showCelebration, setShowCelebration] = useState(false);
+      const [showError, setShowError] = useState(false);
+      const [shake, setShake] = useState(false);
+
+      const page = pages[currentPage];
+      const isCorrect = selectedAnswer === page.correct;
+
+      const handleAnswer = (index) => {
+        if (showResult) return;
+        
+        const page = pages[currentPage];
+        setSelectedAnswer(index);
+        setShowResult(true);
+        
+        if (index === page.correct) {
+          setShowCelebration(true);
+          setTimeout(() => {
+            setShowCelebration(false);
+            if (currentPage < pages.length - 1) {
+              setCurrentPage(currentPage + 1);
+              setSelectedAnswer(null);
+              setShowResult(false);
+            }
+          }, 2000);
+        } else {
+          setShowError(true);
+          setShake(true);
+          setTimeout(() => {
+            setShowError(false);
+            setShake(false);
+            setSelectedAnswer(null);
+            setShowResult(false);
+          }, 1500);
+        }
+      };
+
+      const handleScroll = () => {
+        if (page.type === 'content' && currentPage < pages.length - 1) {
+          setCurrentPage(currentPage + 1);
+          setSelectedAnswer(null);
+          setShowResult(false);
+        }
+      };
+
+      const mapUrl = page.location 
+        ? `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${page.location.lat},${page.location.lng}&zoom=14`
+        : null;
+
+      return React.createElement('div', { className: "h-screen w-full bg-black overflow-hidden relative" },
+        showCelebration && React.createElement('div', { className: "absolute inset-0 z-50 flex items-center justify-center pointer-events-none" },
+          React.createElement('div', { className: "text-center animate-bounce" },
+            React.createElement('div', { className: "text-8xl mb-4" }, '🎉'),
+            React.createElement('div', { className: "text-white text-4xl font-light tracking-wide" }, 'Parfait!'),
+            React.createElement('div', { className: "text-white/70 text-xl font-light mt-2" }, 'Well done!')
+          ),
+          [...Array(20)].map((_, i) =>
+            React.createElement('div', {
+              key: i,
+              className: "absolute w-3 h-3 animate-ping",
+              style: {
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 0.5}s`,
+                animationDuration: '1s',
+                backgroundColor: ['#fbbf24', '#ec4899', '#3b82f6', '#10b981'][i % 4]
+              }
+            })
+          )
+        ),
+        showError && React.createElement('div', { className: "absolute inset-0 z-50 flex items-center justify-center pointer-events-none" },
+          React.createElement('div', { className: shake ? 'text-center animate-shake' : 'text-center' },
+            React.createElement('div', { className: "text-8xl mb-4" }, '😤'),
+            React.createElement('div', { className: "text-red-400 text-4xl font-light tracking-wide" }, 'Non!'),
+            React.createElement('div', { className: "text-white/70 text-xl font-light mt-2" }, 'Try again!')
+          )
+        ),
+        React.createElement('div', { className: "h-full w-full relative" },
+          React.createElement('div', { 
+            className: "absolute inset-0 bg-cover bg-center transition-all duration-700",
+            style: { backgroundImage: `url(${page.image})` }
+          },
+            React.createElement('div', { className: "absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/70" })
+          ),
+          React.createElement('div', { className: "relative h-full flex flex-col justify-between p-8 text-white" },
+            React.createElement('div', { className: "mt-16" },
+              page.type === 'content' ? React.createElement('div', { className: "space-y-4" },
+                React.createElement('h1', { className: "text-5xl font-light tracking-wide" }, page.title),
+                React.createElement('p', { className: "text-xl font-light leading-relaxed opacity-90 max-w-md" }, page.text),
+                page.location && React.createElement('div', { className: "flex items-center gap-2 text-sm opacity-70 mt-6" },
+                  React.createElement(MapPin, { className: "w-4 h-4" }),
+                  React.createElement('span', null, page.location.name)
+                )
+              ) : React.createElement('div', { className: "space-y-2" },
+                React.createElement('div', { className: "flex items-center gap-2 text-sm opacity-70 mb-4" },
+                  React.createElement(Sparkles, { className: "w-4 h-4" }),
+                  React.createElement('span', null, `Question ${Math.floor(currentPage / 2) + 1}`)
+                ),
+                React.createElement('h2', { className: "text-3xl font-light leading-tight max-w-lg" }, page.question)
+              )
+            ),
+            page.type === 'question' ? React.createElement('div', { className: "space-y-3 mb-8" },
+              page.options.map((option, index) => {
+                const isSelected = selectedAnswer === index;
+                const isCorrectAnswer = index === page.correct;
+                
+                let bgClass = 'bg-white/10 backdrop-blur-sm hover:bg-white/20';
+                let borderClass = 'border-white/30';
+                let icon = null;
+
+                if (showResult && isSelected) {
+                  if (isCorrect) {
+                    bgClass = 'bg-green-500/30 backdrop-blur-sm';
+                    borderClass = 'border-green-400';
+                    icon = React.createElement(Check, { className: "w-5 h-5" });
+                  } else {
+                    bgClass = 'bg-red-500/30 backdrop-blur-sm';
+                    borderClass = 'border-red-400';
+                    icon = React.createElement(X, { className: "w-5 h-5" });
+                  }
+                }
+
+                return React.createElement('button', {
+                  key: index,
+                  onClick: () => handleAnswer(index),
+                  disabled: showResult && isCorrect,
+                  className: `w-full p-4 rounded-lg border ${borderClass} ${bgClass} 
+                    transition-all duration-300 text-left flex items-center justify-between
+                    ${(!showResult || !isCorrect) && 'cursor-pointer'}`
+                },
+                  React.createElement('span', { className: "text-lg font-light" }, option),
+                  icon
+                );
+              })
+            ) : page.location && React.createElement('div', { className: "mb-8" },
+              React.createElement('div', { className: "rounded-lg overflow-hidden border border-white/20 h-48 bg-white/5 backdrop-blur-sm" },
+                React.createElement('iframe', {
+                  width: "100%",
+                  height: "100%",
+                  frameBorder: "0",
+                  style: { border: 0 },
+                  src: mapUrl,
+                  allowFullScreen: true,
+                  className: "opacity-80"
+                })
+              )
+            ),
+            React.createElement('div', { className: "flex flex-col items-center pb-8" },
+              React.createElement('div', { className: "text-sm font-light tracking-widest mb-2 opacity-70" },
+                `${currentPage + 1} / ${pages.length}`
+              ),
+              page.type === 'content' && currentPage < pages.length - 1 && React.createElement('button', {
+                onClick: handleScroll,
+                className: "flex flex-col items-center animate-bounce opacity-70 hover:opacity-100 transition-opacity"
+              },
+                React.createElement(ChevronDown, { className: "w-8 h-8" })
+              )
+            )
+          )
+        ),
+        React.createElement('style', null, `
+          @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+          }
+          .animate-shake {
+            animation: shake 0.5s;
+          }
+        `)
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(React.createElement(InstagramQuiz));
+  </script>
+</body>
+</html>
